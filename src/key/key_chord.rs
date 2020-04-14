@@ -71,6 +71,14 @@ impl KeyChord {
         }
     }
 
+    pub fn get_modifiers(&self) -> &Vec<KeyChordPart> {
+        &self.modifiers
+    }
+
+    pub fn get_key(&self) -> &KeyChordPart {
+        &self.key
+    }
+
     pub fn into_event(self) -> KeyChordEvent {
         KeyChordEvent::new(self)
     }

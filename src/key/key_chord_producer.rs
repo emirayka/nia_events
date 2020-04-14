@@ -55,7 +55,7 @@ impl KeyChordProducer {
 
         for (id, path) in keyboards.iter().enumerate() {
             let listener = KeyboardListener::new(
-                KeyboardId::new(id),
+                KeyboardId::new(id as u16),
                 path.clone()
             );
 

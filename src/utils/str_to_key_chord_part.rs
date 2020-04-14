@@ -6,7 +6,7 @@ fn str_to_keyboard_id(
     s: &str,
     names_to_keyboard_identifiers: &HashMap<String, KeyboardId>
 ) -> Result<KeyboardId, ()> {
-    if let Ok(id) = s.parse::<usize>() {
+    if let Ok(id) = s.parse() {
         Ok(KeyboardId::new(id))
     } else if names_to_keyboard_identifiers.contains_key(s) {
         Ok(*names_to_keyboard_identifiers.get(s).unwrap())

@@ -17,4 +17,8 @@ impl KeyId {
             id: ev_key as u16,
         }
     }
+
+    pub fn get_id(&self) -> u16 {
+        self.id
+    }
 }
