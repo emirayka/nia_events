@@ -8,5 +8,6 @@ mod utils;
 pub use {
     key::*,
     utils::*,
+    event_listener::*,
 };
 
