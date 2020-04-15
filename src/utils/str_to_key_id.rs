@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use evdev_rs::enums::EV_KEY;
 
-use crate::key::KeyId;
+use crate::input_listeners::KeyId;
 
 lazy_static!{
     static ref STRING_TO_KEY_ID: HashMap<&'static str, KeyId> = {

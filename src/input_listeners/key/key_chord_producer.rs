@@ -2,10 +2,9 @@ use std::collections::HashMap;
 use std::thread;
 use std::sync::mpsc;
 
-use crate::key::{KeyChordProducerSettings, KeyboardId, KeyChord, KeyboardListenerAggregator, KeyboardListener, KeyboardEventType};
-use crate::key::keyboard_event::KeyboardEvent;
-use crate::key::key_chord_event::KeyChordEvent;
-use crate::key::key_chord::KeyChordPart;
+use crate::input_listeners::{KeyChordPart, KeyChord, KeyboardListenerAggregator, KeyboardId, KeyboardListener, KeyChordProducerSettings, KeyboardEventType};
+use crate::input_listeners::key::keyboard_event::KeyboardEvent;
+use crate::input_listeners::key::key_chord_event::KeyChordEvent;
 
 fn is_modifier_event(
     map: &HashMap<KeyChordPart, bool>,

@@ -1,8 +1,8 @@
 use std::thread;
 use std::sync::mpsc;
 
-use crate::key::keyboard_listener::KeyboardListener;
-use crate::key::keyboard_event::KeyboardEvent;
+use crate::input_listeners::KeyboardListener;
+use crate::input_listeners::key::keyboard_event::KeyboardEvent;
 
 pub struct KeyboardListenerAggregator {
     keyboard_listeners: Vec<KeyboardListener>,

@@ -1,12 +1,21 @@
-use crate::key::keyboard_id::KeyboardId;
-use crate::key::key_id::KeyId;
-use crate::key::key_chord_event::KeyChordEvent;
 use std::hash::{Hash, Hasher};
+
+use crate::input_listeners::{KeyboardId, KeyId, KeyChordProducerSettings};
+use crate::input_listeners::key::key_chord_event::KeyChordEvent;
 
 #[derive(Clone, Copy, Debug, Eq)]
 pub enum KeyChordPart {
     Key1(KeyId),
     Key2(KeyboardId, KeyId),
+}
+
+impl KeyChordPart {
+    pub fn get_key_id(&self) -> KeyId {
+        match self {
+            KeyChordPart::Key1(key_id) => *key_id,
+            KeyChordPart::Key2(_, key_id) => *key_id,
+        }
+    }
 }
 
 impl Hash for KeyChordPart {

@@ -1,4 +1,4 @@
-use crate::key::{KeyChordPart, KeyChordProducerSettings};
+use crate::input_listeners::{KeyChordProducerSettings, KeyChordPart};
 
 pub struct EventListenerSettings {
     key_chord_producer_settings: KeyChordProducerSettings,

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
-use crate::key::{KeyboardId, KeyChordPart};
-use crate::utils::str_to_key_id;
+
+use crate::input_listeners::{KeyboardId, KeyChordPart};
+use crate::str_to_key_id;
 
 fn str_to_keyboard_id(
     s: &str,

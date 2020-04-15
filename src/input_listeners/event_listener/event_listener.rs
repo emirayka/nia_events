@@ -1,9 +1,7 @@
 use std::thread;
 use std::sync::mpsc;
 
-use crate::key::KeyChordProducer;
-use crate::event_listener::event_listener_settings::EventListenerSettings;
-use crate::event_listener::event::Event;
+use crate::input_listeners::{KeyChordProducer, EventListenerSettings, Event};
 
 pub struct EventListener {
     key_chord_producer: KeyChordProducer,

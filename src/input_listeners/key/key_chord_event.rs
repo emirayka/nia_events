@@ -1,4 +1,4 @@
-use crate::key::key_chord::KeyChord;
+use crate::input_listeners::KeyChord;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct KeyChordEvent {

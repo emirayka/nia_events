@@ -3,9 +3,10 @@ use std::thread;
 use std::sync::mpsc;
 
 use evdev_rs::enums::EventCode;
-use crate::key::keyboard_id::KeyboardId;
-use crate::key::keyboard_event::{KeyboardEvent, KeyboardEventType};
-use crate::key::key_id::KeyId;
+
+use crate::input_listeners::{KeyboardId, KeyId, KeyboardEventType};
+use crate::input_listeners::key::keyboard_event::KeyboardEvent;
+
 
 pub struct KeyboardListener {
     keyboard_id: KeyboardId,

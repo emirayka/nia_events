@@ -1,4 +1,4 @@
-use crate::key::key_chord::KeyChordPart;
+use crate::input_listeners::KeyChordPart;
 
 pub struct KeyChordProducerSettings {
     keyboards: Vec<String>,

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-use crate::key::{KeyboardId, KeyChord};
+
+use crate::input_listeners::{KeyboardId, KeyChord};
 use crate::utils::str_to_key_chord_part;
 
 pub fn str_to_key_chord(
@@ -50,8 +51,9 @@ pub fn str_to_key_chord(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::key::KeyChordPart;
+
     use crate::utils::str_to_key_id;
+    use crate::input_listeners::KeyChordPart;
 
     #[test]
     fn works_correctly() {
