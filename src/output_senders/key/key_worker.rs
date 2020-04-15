@@ -15,18 +15,19 @@ fn uinput_write_key_chord(uinput_device: &mut uinput::Device, key_chord: KeyChor
 
     for modifier in modifiers {
         uinput_device.write(uinput_sys::EV_KEY, modifier.get_key_id().get_id() as i32, 1);
-        uinput_device.synchronize();
+        // uinput_device.synchronize();
     }
 
     uinput_device.write(uinput_sys::EV_KEY, key.get_key_id().get_id() as i32, 1);
-    uinput_device.synchronize();
+    // uinput_device.synchronize();
     uinput_device.write(uinput_sys::EV_KEY, key.get_key_id().get_id() as i32, 0);
-    uinput_device.synchronize();
+    // uinput_device.synchronize();
 
     for modifier in modifiers {
         uinput_device.write(uinput_sys::EV_KEY, modifier.get_key_id().get_id() as i32, 0);
-        uinput_device.synchronize();
+        // uinput_device.synchronize();
     }
+    uinput_device.synchronize();
 }
 
 pub struct KeyWorker {}
