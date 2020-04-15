@@ -1,6 +1,6 @@
 use std::hash::{Hash, Hasher};
 
-use crate::input_listeners::{KeyboardId, KeyId, KeyChordProducerSettings};
+use crate::input_listeners::{KeyboardId, KeyId};
 use crate::input_listeners::key::key_chord_event::KeyChordEvent;
 
 #[derive(Clone, Copy, Debug, Eq)]

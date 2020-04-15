@@ -4,30 +4,40 @@ use std::sync::mpsc;
 use uinput_sys;
 use uinput;
 
-use crate::input_listeners::{KeyChord, KeyId};
+use crate::input_listeners::{KeyChord};
 use crate::output_senders::KeyCommand;
-use std::time::Duration;
-use std::convert::TryFrom;
 
 fn uinput_write_key_chord(uinput_device: &mut uinput::Device, key_chord: KeyChord) {
     let modifiers = key_chord.get_modifiers();
     let key = key_chord.get_key();
 
     for modifier in modifiers {
-        uinput_device.write(uinput_sys::EV_KEY, modifier.get_key_id().get_id() as i32, 1);
-        // uinput_device.synchronize();
+        uinput_device.write(
+            uinput_sys::EV_KEY,
+            modifier.get_key_id().get_id() as i32,
+            1
+        ).expect("nia-events: Failed sending key event.");
     }
 
-    uinput_device.write(uinput_sys::EV_KEY, key.get_key_id().get_id() as i32, 1);
-    // uinput_device.synchronize();
-    uinput_device.write(uinput_sys::EV_KEY, key.get_key_id().get_id() as i32, 0);
-    // uinput_device.synchronize();
+    uinput_device.write(
+        uinput_sys::EV_KEY,
+        key.get_key_id().get_id() as i32,
+        1
+    ).expect("nia-events: Failed sending key event.");
+    uinput_device.write(
+        uinput_sys::EV_KEY,
+        key.get_key_id().get_id() as i32,
+        0
+    ).expect("nia-events: Failed sending key event.");
 
     for modifier in modifiers {
-        uinput_device.write(uinput_sys::EV_KEY, modifier.get_key_id().get_id() as i32, 0);
-        // uinput_device.synchronize();
+        uinput_device.write(
+            uinput_sys::EV_KEY,
+            modifier.get_key_id().get_id() as i32,
+            0
+        ).expect("nia-events: Failed sending key event.");
     }
-    uinput_device.synchronize();
+    uinput_device.synchronize().expect("nia-events: Failed to synchronize.");
 }
 
 pub struct KeyWorker {}
