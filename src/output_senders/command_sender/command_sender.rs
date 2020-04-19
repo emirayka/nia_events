@@ -28,7 +28,10 @@ impl CommandSender {
                     Ok(command) => {
                         match command {
                             Command::KeyCommand(key_command) => {
-                                key_command_sender.send(key_command).unwrap();
+                                match key_command_sender.send(key_command) {
+                                    Err(_) => break,
+                                    _ => {}
+                                }
                             }
                         }
                     },

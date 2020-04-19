@@ -141,8 +141,10 @@ impl KeyChordProducer {
 
                             let key_chord_event = key_chord.into_event();
 
-                            tx2.send(key_chord_event)
-                                .expect("Failed to send key chord to overall listener.");
+                            match tx2.send(key_chord_event) {
+                                Err(_) => break,
+                                _ => {}
+                            }
                         }
                     },
                     Err(_) => {

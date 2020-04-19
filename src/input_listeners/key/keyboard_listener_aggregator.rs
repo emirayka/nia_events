@@ -57,7 +57,7 @@ impl KeyboardListenerAggregator {
             }
 
             for stopper in stoppers {
-                stopper.send(()).unwrap();
+                stopper.send(());
             }
         });
 

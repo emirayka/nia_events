@@ -68,8 +68,10 @@ impl KeyboardListener {
                                                 event_type,
                                             );
 
-                                            sender.send(keyboard_event)
-                                                .expect("Failed to send keyboard event to aggregator.");
+                                            match sender.send(keyboard_event) {
+                                                Err(_) => break,
+                                                _ => {}
+                                            }
                                         }
                                         _ => {}
                                     }
