@@ -6,6 +6,7 @@ use uinput;
 
 use crate::input_listeners::{KeyChord};
 use crate::output_senders::KeyCommand;
+use std::sync::mpsc::TryRecvError;
 
 fn uinput_write_key_chord(uinput_device: &mut uinput::Device, key_chord: KeyChord) {
     let modifiers = key_chord.get_modifiers();
@@ -47,11 +48,13 @@ impl KeyWorker {
         KeyWorker {}
     }
 
-    pub fn start_working(&self) -> mpsc::Sender<KeyCommand> {
+    pub fn start_working(&self) -> (mpsc::Sender<KeyCommand>, mpsc::Sender<()>) {
         let (
             command_sender,
             command_receiver
         ) = mpsc::channel();
+
+        let (tx, rx) = mpsc::channel();
 
         thread::spawn(move || {
             let mut uinput_device = uinput::default()
@@ -64,17 +67,28 @@ impl KeyWorker {
                 .expect("Can't create default uinput device.");
 
             loop {
-                let key_command = command_receiver.recv()
-                    .expect("Failure while reading key command.");
-
-                match key_command {
-                    KeyCommand::ForwardKeyChord(key_chord) => {
-                        uinput_write_key_chord(&mut uinput_device, key_chord);
+                match command_receiver.recv() {
+                    Ok(key_command) => {
+                        match key_command {
+                            KeyCommand::ForwardKeyChord(key_chord) => {
+                                uinput_write_key_chord(&mut uinput_device, key_chord);
+                            }
+                        }
+                    },
+                    Err(_) => {
+                        break;
                     }
+                }
+
+                match rx.try_recv() {
+                    Ok(()) | Err(TryRecvError::Disconnected) => {
+                        break;
+                    },
+                    Err(TryRecvError::Empty) => {}
                 }
             }
         });
 
-        command_sender
+        (command_sender, tx)
     }
 }

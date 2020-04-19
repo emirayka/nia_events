@@ -6,6 +6,8 @@ use evdev_rs::enums::EventCode;
 
 use crate::input_listeners::{KeyboardId, KeyId, KeyboardEventType};
 use crate::input_listeners::key::keyboard_event::KeyboardEvent;
+use std::sync::mpsc::TryRecvError;
+use std::time::Duration;
 
 
 pub struct KeyboardListener {
@@ -21,10 +23,12 @@ impl KeyboardListener {
         }
     }
 
-    pub fn start_listening(&self, sender: mpsc::Sender<KeyboardEvent>) {
+    pub fn start_listening(&self, sender: mpsc::Sender<KeyboardEvent>) -> mpsc::Sender<()> {
         let sender = sender;
         let device_path = self.device_path.clone();
         let keyboard_id = self.keyboard_id;
+
+        let (tx, rx) = mpsc::channel();
 
         thread::spawn(move || {
             let f1 = File::open(device_path).unwrap();
@@ -38,45 +42,58 @@ impl KeyboardListener {
             let flags = evdev_rs::ReadFlag::NORMAL | evdev_rs::ReadFlag::BLOCKING;
 
             loop {
-                match device.next_event(flags) {
-                    Ok((read_status, event)) => {
-                        match read_status {
-                            evdev_rs::ReadStatus::Sync => {
-                            },
-                            evdev_rs::ReadStatus::Success => {
-                                match event.event_type {
-                                    evdev_rs::enums::EventType::EV_KEY => {
-                                        let keyboard_id = keyboard_id;
+                if device.has_event_pending() {
+                    match device.next_event(flags) {
+                        Ok((read_status, event)) => {
+                            match read_status {
+                                evdev_rs::ReadStatus::Sync => {}
+                                evdev_rs::ReadStatus::Success => {
+                                    match event.event_type {
+                                        evdev_rs::enums::EventType::EV_KEY => {
+                                            let keyboard_id = keyboard_id;
 
-                                        let key_id = if let EventCode::EV_KEY(ev_key) = event.event_code {
-                                            KeyId::from_ev_key(ev_key)
-                                        } else {
-                                            continue;
-                                        };
+                                            let key_id = if let EventCode::EV_KEY(ev_key) = event.event_code {
+                                                KeyId::from_ev_key(ev_key)
+                                            } else {
+                                                continue;
+                                            };
 
-                                        let event_type = KeyboardEventType::from_value(
-                                            event.value
-                                        );
+                                            let event_type = KeyboardEventType::from_value(
+                                                event.value
+                                            );
 
-                                        let keyboard_event = KeyboardEvent::new(
-                                            keyboard_id,
-                                            key_id,
-                                            event_type
-                                        );
+                                            let keyboard_event = KeyboardEvent::new(
+                                                keyboard_id,
+                                                key_id,
+                                                event_type,
+                                            );
 
-                                        sender.send(keyboard_event)
-                                            .expect("Failed to send keyboard event to aggregator.");
-                                    },
-                                    _ => {}
+                                            sender.send(keyboard_event)
+                                                .expect("Failed to send keyboard event to aggregator.");
+                                        }
+                                        _ => {}
+                                    }
                                 }
-                            },
+                            }
                         }
-                    },
-                    Err(_) => {
-                        panic!();
+                        Err(errno) => {
+                            println!("{:?}", errno);
+                            break;
+                        }
                     }
+                } else {
+                    match rx.try_recv() {
+                        Ok(()) | Err(TryRecvError::Disconnected) => {
+                            break;
+                        },
+                        Err(TryRecvError::Empty) => {}
+                    }
+
+                    thread::sleep(Duration::from_millis(10))
                 }
             }
         });
+
+        tx
     }
 }

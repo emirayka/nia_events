@@ -3,6 +3,7 @@ use std::sync::mpsc;
 
 use crate::input_listeners::KeyboardListener;
 use crate::input_listeners::key::keyboard_event::KeyboardEvent;
+use std::sync::mpsc::TryRecvError;
 
 pub struct KeyboardListenerAggregator {
     keyboard_listeners: Vec<KeyboardListener>,
@@ -19,28 +20,47 @@ impl KeyboardListenerAggregator {
         self.keyboard_listeners.push(keyboard_listener);
     }
 
-    pub fn start_listening(&self, sender: mpsc::Sender<KeyboardEvent>) {
+    pub fn start_listening(&self, sender: mpsc::Sender<KeyboardEvent>) -> mpsc::Sender<()> {
         let (tx, rx) = mpsc::channel::<KeyboardEvent>();
+        let (tx2, rx2) = mpsc::channel();
+        let mut stoppers = Vec::new();
 
         for keyboard_listener in &self.keyboard_listeners {
             let tx = tx.clone();
 
-            keyboard_listener.start_listening(tx);
+            let stopper = keyboard_listener.start_listening(tx);
+            stoppers.push(stopper);
         }
 
         thread::spawn(move || {
             loop {
-                let keyboard_event = match rx.recv() {
-                    Ok(event) => event,
-                    Err(error) => {
-                        println!("{:?}", error);
-                        panic!("");
-                    }
+                match rx.recv() {
+                    Ok(keyboard_event) => {
+                        match sender.send(keyboard_event) {
+                            Ok(_) => {},
+                            Err(_) => {
+                                break;
+                            }
+                        }
+                    },
+                    Err(_) => {
+                        break;
+                    },
                 };
 
-                sender.send(keyboard_event)
-                    .expect("Failed to send keyboard event to key chord producer.");
+                match rx2.try_recv() {
+                    Ok(()) | Err(TryRecvError::Disconnected) => {
+                        break;
+                    },
+                    Err(TryRecvError::Empty) => {}
+                }
+            }
+
+            for stopper in stoppers {
+                stopper.send(()).unwrap();
             }
         });
+
+        tx2
     }
 }

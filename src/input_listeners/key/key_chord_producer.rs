@@ -5,6 +5,7 @@ use std::sync::mpsc;
 use crate::input_listeners::{KeyChordPart, KeyChord, KeyboardListenerAggregator, KeyboardId, KeyboardListener, KeyChordProducerSettings, KeyboardEventType};
 use crate::input_listeners::key::keyboard_event::KeyboardEvent;
 use crate::input_listeners::key::key_chord_event::KeyChordEvent;
+use std::sync::mpsc::TryRecvError;
 
 fn is_modifier_event(
     map: &HashMap<KeyChordPart, bool>,
@@ -73,7 +74,7 @@ impl KeyChordProducer {
         key_chord_producer
     }
 
-    pub fn start_listening(&self) -> mpsc::Receiver<KeyChordEvent> {
+    pub fn start_listening(&self) -> (mpsc::Receiver<KeyChordEvent>, mpsc::Sender<()>) {
         let modifier_keys = self.modifier_keys.clone();
 
         let (
@@ -86,7 +87,12 @@ impl KeyChordProducer {
             rx2
         ) = mpsc::channel();
 
-        self.listener.start_listening(tx);
+        let (
+            tx3,
+            rx3
+        ) = mpsc::channel();
+
+        let stopper = self.listener.start_listening(tx);
 
         thread::spawn(move || {
             let modifier_keys = modifier_keys;
@@ -98,48 +104,63 @@ impl KeyChordProducer {
             }
 
             loop {
-                let keyboard_event = rx.recv().unwrap();
-                let key_chord_part = KeyChordPart::Key2(
-                    keyboard_event.get_keyboard_id(),
-                    keyboard_event.get_key_id()
-                );
+                match rx.recv() {
+                    Ok(keyboard_event) => {
+                        let key_chord_part = KeyChordPart::Key2(
+                            keyboard_event.get_keyboard_id(),
+                            keyboard_event.get_key_id()
+                        );
 
-                if is_modifier_event(&mut modifier_map, key_chord_part) {
-                    match keyboard_event.get_event_type() {
-                        KeyboardEventType::PRESSED => {
-                            set_modifier_state(
-                                &mut modifier_map,
-                                key_chord_part,
-                                true
-                            )
-                        },
-                        KeyboardEventType::RELEASED => {
-                            set_modifier_state(
-                                &mut modifier_map,
-                                key_chord_part,
-                                false
-                            )
-                        },
-                        _ => {}
+                        if is_modifier_event(&mut modifier_map, key_chord_part) {
+                            match keyboard_event.get_event_type() {
+                                KeyboardEventType::PRESSED => {
+                                    set_modifier_state(
+                                        &mut modifier_map,
+                                        key_chord_part,
+                                        true
+                                    )
+                                },
+                                KeyboardEventType::RELEASED => {
+                                    set_modifier_state(
+                                        &mut modifier_map,
+                                        key_chord_part,
+                                        false
+                                    )
+                                },
+                                _ => {}
+                            }
+                        } else {
+                            if keyboard_event.get_event_type() == KeyboardEventType::PRESSED {
+                                continue;
+                            }
+
+                            let key_chord = construct_key_chord(
+                                &modifier_map,
+                                keyboard_event
+                            );
+
+                            let key_chord_event = key_chord.into_event();
+
+                            tx2.send(key_chord_event)
+                                .expect("Failed to send key chord to overall listener.");
+                        }
+                    },
+                    Err(_) => {
+                        break;
                     }
-                } else {
-                    if keyboard_event.get_event_type() == KeyboardEventType::PRESSED {
-                        continue;
-                    }
+                }
 
-                    let key_chord = construct_key_chord(
-                        &modifier_map,
-                        keyboard_event
-                    );
-
-                    let key_chord_event = key_chord.into_event();
-
-                    tx2.send(key_chord_event)
-                        .expect("Failed to send key chord to overall listener.");
+                match rx3.try_recv() {
+                    Ok(()) | Err(TryRecvError::Disconnected) => {
+                        break;
+                    },
+                    Err(TryRecvError::Empty) => { }
                 }
             }
+
+            stopper.send(())
         });
 
-        rx2
+        (rx2, tx3)
     }
 }
