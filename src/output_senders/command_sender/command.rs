@@ -1,13 +1,15 @@
 use crate::input_listeners::KeyChord;
-use crate::output_senders::KeyCommand;
+use crate::output_senders::UinputCommand;
 
 #[derive(Clone, Debug)]
 pub enum Command {
-    KeyCommand(KeyCommand),
+    UinputCommand(UinputCommand),
+    Spawn(String),
+    Wait(u64),
 }
 
 impl Command {
     pub fn forward_key_chord(key_chord: KeyChord) -> Command {
-        Command::KeyCommand(KeyCommand::ForwardKeyChord(key_chord))
+        Command::UinputCommand(UinputCommand::ForwardKeyChord(key_chord))
     }
 }

@@ -4,6 +4,7 @@ use std::sync::mpsc;
 use crate::output_senders::Command;
 use crate::output_senders::KeyWorker;
 use std::sync::mpsc::TryRecvError;
+use std::time::Duration;
 
 pub struct CommandSender {
 }
@@ -27,12 +28,20 @@ impl CommandSender {
                 match command_receiver.recv() {
                     Ok(command) => {
                         match command {
-                            Command::KeyCommand(key_command) => {
+                            Command::UinputCommand(key_command) => {
                                 match key_command_sender.send(key_command) {
                                     Err(_) => break,
                                     _ => {}
                                 }
-                            }
+                                thread::sleep(Duration::from_millis(1));
+                            },
+                            Command::Spawn(path) => {
+                                std::process::Command::new(path)
+                                    .output();
+                            },
+                            Command::Wait(milliseconds) => {
+                                thread::sleep(Duration::from_millis(milliseconds));
+                            },
                         }
                     },
                     Err(_) => {

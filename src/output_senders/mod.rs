@@ -1,7 +1,7 @@
 mod command_sender;
-mod key;
+mod _uinput;
 
 pub use {
     command_sender::*,
-    key::*,
+    _uinput::*,
 };

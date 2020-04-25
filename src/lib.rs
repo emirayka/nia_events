@@ -2,6 +2,7 @@
 extern crate lazy_static;
 extern crate uinput_sys;
 extern crate uinput;
+extern crate xcb;
 
 mod utils;
 mod input_listeners;

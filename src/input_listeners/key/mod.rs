@@ -1,3 +1,4 @@
+mod button_id;
 mod key_id;
 mod keyboard_id;
 mod keyboard_event;
@@ -10,6 +11,7 @@ mod key_chord_producer;
 mod key_chord_producer_settings;
 
 pub use {
+    button_id::ButtonId,
     key_id::KeyId,
     keyboard_id::KeyboardId,
     keyboard_event::KeyboardEventType,
