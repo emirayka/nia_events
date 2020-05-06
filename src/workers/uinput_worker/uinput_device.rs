@@ -1,8 +1,8 @@
 use crate::Error;
 
-use crate::enums::KeyId;
 use crate::enums::ButtonId;
 use crate::enums::KeyChord;
+use crate::enums::KeyId;
 
 pub struct UInputDevice {
     device: uinput::Device,
@@ -10,15 +10,15 @@ pub struct UInputDevice {
 
 impl UInputDevice {
     pub fn new(device: uinput::Device) -> UInputDevice {
-        UInputDevice {
-            device
-        }
+        UInputDevice { device }
     }
 
     fn send_key_down_event(&mut self, code: i32) -> Result<(), Error> {
         self.device
             .write(uinput_sys::EV_KEY, code, 1)
-            .map_err(|_| Error::uinput_error(&format!("Error sending key down event: {}.", code)))?;
+            .map_err(|_| {
+                Error::uinput_error(&format!("Error sending key down event: {}.", code))
+            })?;
 
         Ok(())
     }

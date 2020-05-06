@@ -1,7 +1,7 @@
 use crate::enums::KeyChordPart;
 
-use crate::ListenerSettings;
 use crate::KeyChordProducerSettings;
+use crate::ListenerSettings;
 
 pub struct ListenerSettingsBuilder {
     keyboards: Vec<String>,

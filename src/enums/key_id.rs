@@ -1,5 +1,5 @@
-use std::str::FromStr;
 use std::collections::HashMap;
+use std::str::FromStr;
 
 use evdev_rs::enums::EV_KEY;
 
@@ -150,7 +150,10 @@ impl FromStr for KeyId {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match STRING_TO_KEY_ID_MAP.get(s) {
             Some(v) => Ok(*v),
-            None => Err(Error::key_parse_error(&format!("Cannot parse {} as key identifier.", s))),
+            None => Err(Error::key_parse_error(&format!(
+                "Cannot parse {} as key identifier.",
+                s
+            ))),
         }
     }
 }

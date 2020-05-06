@@ -2,15 +2,15 @@ use std::collections::HashMap;
 use std::sync::mpsc;
 use std::thread;
 
-use crate::KeyChordPart;
 use crate::KeyChord;
-use crate::KeyboardEvent;
-use crate::KeyboardListenerAggregator;
+use crate::KeyChordEvent;
 use crate::KeyChordProducerSettings;
+use crate::KeyboardEvent;
+use crate::KeyboardEventType;
 use crate::KeyboardId;
 use crate::KeyboardListener;
-use crate::KeyChordEvent;
-use crate::KeyboardEventType;
+use crate::KeyboardListenerAggregator;
+use crate::{KeyChordPart, KeyChordProducerHandle};
 use std::time::Duration;
 
 fn is_modifier_event(
@@ -30,10 +30,7 @@ fn set_modifier_state(
     *reference = state;
 }
 
-fn construct_key_chord(
-    map: &HashMap<KeyChordPart, bool>,
-    event: KeyboardEvent,
-) -> KeyChord {
+fn construct_key_chord(map: &HashMap<KeyChordPart, bool>, event: KeyboardEvent) -> KeyChord {
     let modifier_keys = map
         .iter()
         .filter(|(_, pressed)| **pressed)
@@ -75,28 +72,32 @@ impl KeyChordProducer {
         key_chord_producer
     }
 
-    pub fn start_listening(self) -> (mpsc::Receiver<KeyChordEvent>, mpsc::Sender<()>) {
+    pub fn start_listening(self) -> KeyChordProducerHandle {
         let modifier_keys = self.modifier_keys.clone();
 
-        let (
-            keyboard_event_sender,
-            keyboard_event_receiver
-        ) = mpsc::channel();
+        let (keyboard_event_sender, keyboard_event_receiver) = mpsc::channel();
 
-        let (
-            key_chord_event_sender,
-            key_chord_event_receiver
-        ) = mpsc::channel();
+        let (key_chord_event_sender, key_chord_event_receiver) = mpsc::channel();
 
-        let (
-            stop_sender,
-            stop_receiver
-        ) = mpsc::channel();
+        let (stop_sender, stop_receiver) = mpsc::channel();
 
-        let keyboard_listener_aggregator_handle =
-            self.keyboard_listener_aggregator.start_listening(keyboard_event_sender);
+        let keyboard_listener_aggregator = self.keyboard_listener_aggregator;
 
         thread::spawn(move || {
+            key_chord_producer_log!("Key chord producer spawned.");
+
+            key_chord_producer_log!("Starting Keyboard Listener Aggregator...");
+
+            let keyboard_listener_aggregator_handle =
+                keyboard_listener_aggregator.start_listening(keyboard_event_sender);
+
+            key_chord_producer_log!(
+                "Started channel: [Keyboard Listener Aggregator] -> [Key Chord Producer]."
+            );
+            key_chord_producer_log!(
+                "Started channel: [Key Chord Producer] -> [Keyboard Listener Aggregator]."
+            );
+
             let modifier_keys = modifier_keys;
             let mut modifier_map = HashMap::new();
 
@@ -120,7 +121,7 @@ impl KeyChordProducer {
                                 KeyboardEventType::RELEASED => {
                                     set_modifier_state(&mut modifier_map, key_chord_part, false);
                                 }
-                                KeyboardEventType::UNKNOWN => { }
+                                KeyboardEventType::UNKNOWN => {}
                             }
                         } else {
                             if keyboard_event.get_event_type() == KeyboardEventType::PRESSED {
@@ -133,14 +134,14 @@ impl KeyChordProducer {
                             match key_chord_event_sender.send(key_chord_event) {
                                 Ok(()) => {}
                                 Err(_) => {
-                                    key_chord_producer_elog!("Key chord producer channel is destructed. Exiting...");
+                                    key_chord_producer_elog!("[Key Chord Producer] -> [Listener] channel is destructed. Exiting...");
                                     break;
-                                },
+                                }
                             }
                         }
                     }
                     Err(mpsc::TryRecvError::Disconnected) => {
-                        key_chord_producer_elog!("Key chord producer channel is destructed. Exiting...");
+                        key_chord_producer_elog!("[Keyboard Event Aggregator] -> [Key Chord Producer] channel is destructed. Exiting...");
                         break;
                     }
                     Err(mpsc::TryRecvError::Empty) => {}
@@ -152,7 +153,9 @@ impl KeyChordProducer {
                         break;
                     }
                     Err(mpsc::TryRecvError::Disconnected) => {
-                        key_chord_producer_elog!("Key chord producer channel is destructed. Exiting...");
+                        key_chord_producer_elog!(
+                            "[Listener] -> [Key Chord Producer] channel is destructed. Exiting..."
+                        );
                         break;
                     }
                     Err(mpsc::TryRecvError::Empty) => {}
@@ -161,9 +164,26 @@ impl KeyChordProducer {
                 thread::sleep(Duration::from_millis(10));
             }
 
-            keyboard_listener_aggregator_handle.stop()
+            key_chord_producer_log!("Execution is ended. Cleanup...");
+            key_chord_producer_log!("Stopping keyboard listener aggregator...");
+
+            match keyboard_listener_aggregator_handle.stop() {
+                Ok(_) => {
+                    key_chord_producer_log!(
+                        "Stopped channel: [Keyboard Listener Aggregator] -> [Key Chord Producer]."
+                    );
+                    key_chord_producer_log!(
+                        "Stopped channel: [Key Chord Producer] -> [Keyboard Listener Aggregator]."
+                    );
+                }
+                Err(_) => {
+                    key_chord_producer_elog!("Channel [Key Chord Producer] -> [Keyboard Listener Aggregator] is destructed.");
+                }
+            };
+
+            key_chord_producer_log!("Key Chord Producer is ended.");
         });
 
-        (key_chord_event_receiver, stop_sender)
+        KeyChordProducerHandle::new(key_chord_event_receiver, stop_sender)
     }
 }

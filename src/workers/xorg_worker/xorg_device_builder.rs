@@ -7,9 +7,7 @@ pub struct XorgDeviceBuilder {
 
 impl XorgDeviceBuilder {
     pub fn new() -> XorgDeviceBuilder {
-        XorgDeviceBuilder {
-            display_name: None,
-        }
+        XorgDeviceBuilder { display_name: None }
     }
 
     pub fn set_display_name(mut self, name: String) -> XorgDeviceBuilder {
@@ -22,7 +20,7 @@ impl XorgDeviceBuilder {
         let display_name = self.display_name;
         let display_name_str = match &display_name {
             Some(string) => Some(string.as_str()),
-            None => None
+            None => None,
         };
 
         let connection_result = xcb::Connection::connect(display_name_str)
@@ -39,16 +37,12 @@ impl XorgDeviceBuilder {
         };
         let root = screen.root();
 
-        let xorg_device = XorgDevice::new(
-            connection,
-            root
-        );
+        let xorg_device = XorgDevice::new(connection, root);
 
         Ok(xorg_device)
     }
 
     pub fn build_default() -> Result<XorgDevice, Error> {
-        XorgDeviceBuilder::new()
-            .build()
+        XorgDeviceBuilder::new().build()
     }
 }

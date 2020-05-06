@@ -6,15 +6,13 @@ pub struct KeyboardListenerAggregatorHandle {
 
 impl KeyboardListenerAggregatorHandle {
     pub fn new(stop_sender: mpsc::Sender<()>) -> KeyboardListenerAggregatorHandle {
-        KeyboardListenerAggregatorHandle {
-            stop_sender,
-        }
+        KeyboardListenerAggregatorHandle { stop_sender }
     }
 
     pub fn stop(&self) -> Result<(), ()> {
         match self.stop_sender.send(()) {
             Ok(_) => Ok(()),
-            Err(_) => Err(())
+            Err(_) => Err(()),
         }
     }
 }

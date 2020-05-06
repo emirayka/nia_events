@@ -1,5 +1,5 @@
-use crate::enums::KeyboardId;
 use crate::enums::KeyId;
+use crate::enums::KeyboardId;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum KeyboardEventType {

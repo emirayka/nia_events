@@ -21,7 +21,7 @@ impl KeyboardId {
 impl KeyboardId {
     pub fn from(
         s: &str,
-        names_to_keyboard_identifiers: &HashMap<String, KeyboardId>
+        names_to_keyboard_identifiers: &HashMap<String, KeyboardId>,
     ) -> Result<KeyboardId, Error> {
         if let Ok(id) = s.parse() {
             Ok(KeyboardId::new(id))

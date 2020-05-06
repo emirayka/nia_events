@@ -1,6 +1,6 @@
+use crate::enums::ButtonId;
 use crate::enums::KeyChord;
 use crate::enums::KeyId;
-use crate::enums::ButtonId;
 
 #[derive(Clone, Debug)]
 pub enum UInputWorkerCommand {

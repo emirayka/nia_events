@@ -9,24 +9,27 @@ pub struct UInputWorkerHandle {
 }
 
 impl UInputWorkerHandle {
-    pub fn new(command_sender: mpsc::Sender<UInputWorkerCommand>, stopper: mpsc::Sender<()>) -> UInputWorkerHandle {
+    pub fn new(
+        command_sender: mpsc::Sender<UInputWorkerCommand>,
+        stopper: mpsc::Sender<()>,
+    ) -> UInputWorkerHandle {
         UInputWorkerHandle {
             command_sender,
-            stop_sender: stopper
+            stop_sender: stopper,
         }
     }
 
     pub fn stop(&self) -> Result<(), ()> {
         match self.stop_sender.send(()) {
             Ok(_) => Ok(()),
-            Err(_) => Err(())
+            Err(_) => Err(()),
         }
     }
 
     pub fn send_command(&self, command: UInputWorkerCommand) -> Result<(), ()> {
         match self.command_sender.send(command) {
             Ok(_) => Ok(()),
-            Err(_) => Err(())
+            Err(_) => Err(()),
         }
     }
 }

@@ -58,20 +58,21 @@ impl KeyChordPart {
                 Ok(KeyChordPart::Key1(key_id))
             }
             2 => {
-                let keyboard_id = KeyboardId::from(
-                    key_chord_part_parts[0],
-                    names_to_keyboard_identifiers
-                )?;
+                let keyboard_id =
+                    KeyboardId::from(key_chord_part_parts[0], names_to_keyboard_identifiers)?;
 
                 let key_id = key_chord_part_parts[1].parse::<KeyId>()?;
 
                 Ok(KeyChordPart::Key2(keyboard_id, key_id))
             }
-            _ => return Err(Error::key_parse_error("Invalid key element count in key chord part.")),
+            _ => {
+                return Err(Error::key_parse_error(
+                    "Invalid key element count in key chord part.",
+                ))
+            }
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {

@@ -48,7 +48,7 @@ impl KeyChord {
 impl KeyChord {
     pub fn from(
         s: &str,
-        names_to_keyboard_identifiers: &HashMap<String, KeyboardId>
+        names_to_keyboard_identifiers: &HashMap<String, KeyboardId>,
     ) -> Result<KeyChord, Error> {
         let mut key_chord_parts: Vec<&str> = s.split("+").collect();
 
@@ -58,7 +58,7 @@ impl KeyChord {
 
         let key_chord_part = KeyChordPart::from(
             key_chord_parts.remove(key_chord_parts.len() - 1),
-            names_to_keyboard_identifiers
+            names_to_keyboard_identifiers,
         )?;
 
         let mut modifiers = Vec::new();

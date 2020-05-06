@@ -1,5 +1,5 @@
-mod xorg_device_builder;
 mod xorg_device;
+mod xorg_device_builder;
 mod xorg_worker;
 mod xorg_worker_command;
 mod xorg_worker_handle;

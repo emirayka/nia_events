@@ -2,10 +2,10 @@ use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
 
+use crate::workers::uinput_worker::uinput_worker_handle::UInputWorkerHandle;
 use crate::Error;
 use crate::UInputDeviceBuilder;
 use crate::UInputWorkerCommand;
-use crate::workers::uinput_worker::uinput_worker_handle::UInputWorkerHandle;
 
 pub struct UInputWorker {}
 
@@ -16,10 +16,10 @@ impl UInputWorker {
 
     pub fn start_working(self) -> Result<UInputWorkerHandle, Error> {
         let (command_sender, command_receiver) = mpsc::channel();
-        let (stopper_sender, stopper_receiver) = mpsc::channel();
+        let (stopper_sender, stop_receiver) = mpsc::channel();
 
         thread::spawn(move || {
-            uinput_worker_log!("Uinput worker spawned.");
+            uinput_worker_log!("UInput worker spawned.");
 
             let mut uinput_device = match UInputDeviceBuilder::build_default() {
                 Ok(device) => device,
@@ -30,7 +30,7 @@ impl UInputWorker {
                 }
             };
 
-            uinput_worker_log!("Created uinput device.");
+            uinput_worker_log!("Successfully created uinput device.");
 
             loop {
                 let result = match command_receiver.try_recv() {
@@ -39,15 +39,11 @@ impl UInputWorker {
                             UInputWorkerCommand::ForwardKeyChord(key_chord) => {
                                 uinput_device.key_chord_press(key_chord)
                             }
-                            UInputWorkerCommand::KeyDown(key_id) => {
-                                uinput_device.key_down(key_id)
-                            }
+                            UInputWorkerCommand::KeyDown(key_id) => uinput_device.key_down(key_id),
                             UInputWorkerCommand::KeyPress(key_id) => {
                                 uinput_device.key_press(key_id)
                             }
-                            UInputWorkerCommand::KeyUp(key_id) => {
-                                uinput_device.key_up(key_id)
-                            }
+                            UInputWorkerCommand::KeyUp(key_id) => uinput_device.key_up(key_id),
                             UInputWorkerCommand::MouseButtonDown(button_id) => {
                                 uinput_device.mouse_button_down(button_id)
                             }
@@ -62,14 +58,14 @@ impl UInputWorker {
                         thread::sleep(Duration::from_millis(1));
 
                         result
-                    },
+                    }
                     Err(mpsc::TryRecvError::Disconnected) => {
-                        uinput_worker_elog!("UInput worker channel destructed. Exiting...");
+                        uinput_worker_elog!(
+                            "Channel [Worker] -> [UInput Worker] is destructed. Exiting..."
+                        );
                         break;
                     }
-                    Err(mpsc::TryRecvError::Empty) => {
-                        Ok(())
-                    }
+                    Err(mpsc::TryRecvError::Empty) => Ok(()),
                 };
 
                 if let Err(error) = result {
@@ -77,13 +73,15 @@ impl UInputWorker {
                     uinput_worker_elog!("{}", error.get_message());
                 }
 
-                match stopper_receiver.try_recv() {
+                match stop_receiver.try_recv() {
                     Ok(()) => {
                         uinput_worker_log!("Got exit signal. Exiting...");
                         break;
                     }
                     Err(mpsc::TryRecvError::Disconnected) => {
-                        uinput_worker_elog!("UInput worker channel destructed. Exiting...");
+                        uinput_worker_elog!(
+                            "Channel [Worker] -> [UInput Worker] destructed. Exiting..."
+                        );
                         break;
                     }
                     Err(mpsc::TryRecvError::Empty) => {}
@@ -91,11 +89,11 @@ impl UInputWorker {
 
                 thread::sleep(Duration::from_millis(10));
             }
+
+            xorg_worker_log!("UInput Worker is ended.");
         });
 
-        let uinput_worker_handle = UInputWorkerHandle::new(
-            command_sender, stopper_sender
-        );
+        let uinput_worker_handle = UInputWorkerHandle::new(command_sender, stopper_sender);
 
         Ok(uinput_worker_handle)
     }

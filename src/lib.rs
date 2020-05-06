@@ -7,12 +7,11 @@ extern crate colour;
 #[macro_use]
 mod macros;
 mod enums;
+mod error;
 mod listeners;
 mod workers;
-mod error;
 
 pub use enums::*;
+pub use error::*;
 pub use listeners::*;
 pub use workers::*;
-pub use error::*;
-
