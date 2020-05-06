@@ -1,16 +1,18 @@
 #[macro_use]
 extern crate lazy_static;
-extern crate uinput_sys;
-extern crate uinput;
-extern crate xcb;
 
-mod utils;
-mod input_listeners;
-mod output_senders;
+#[macro_use]
+extern crate colour;
 
-pub use {
-    utils::*,
-    input_listeners::*,
-    output_senders::*,
-};
+#[macro_use]
+mod macros;
+mod enums;
+mod listeners;
+mod workers;
+mod error;
+
+pub use enums::*;
+pub use listeners::*;
+pub use workers::*;
+pub use error::*;
 
