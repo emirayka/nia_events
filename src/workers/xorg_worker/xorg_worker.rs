@@ -23,7 +23,7 @@ impl XorgWorker {
         thread::spawn(move || {
             xorg_worker_log!("Xorg worker spawned.");
 
-            let xorg_device = match XorgDeviceBuilder::build_default() {
+            let mut xorg_device = match XorgDeviceBuilder::build_default() {
                 Ok(device) => device,
                 Err(error) => {
                     xorg_worker_elog!("Cannot create xorg device:");
