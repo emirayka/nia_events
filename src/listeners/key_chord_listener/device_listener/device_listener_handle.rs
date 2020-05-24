@@ -1,12 +1,12 @@
 use std::sync::mpsc;
 
-pub struct KeyboardListenerHandle {
+pub struct DeviceListenerHandle {
     stop_sender: mpsc::Sender<()>,
 }
 
-impl KeyboardListenerHandle {
-    pub fn new(stop_sender: mpsc::Sender<()>) -> KeyboardListenerHandle {
-        KeyboardListenerHandle { stop_sender }
+impl DeviceListenerHandle {
+    pub fn new(stop_sender: mpsc::Sender<()>) -> DeviceListenerHandle {
+        DeviceListenerHandle { stop_sender }
     }
 
     pub fn stop(&self) -> Result<(), ()> {

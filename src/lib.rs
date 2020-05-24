@@ -2,7 +2,7 @@
 extern crate lazy_static;
 
 #[macro_use]
-extern crate colour;
+extern crate log;
 
 #[macro_use]
 mod macros;

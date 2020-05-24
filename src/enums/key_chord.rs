@@ -2,13 +2,13 @@ use std::collections::HashMap;
 use std::hash::Hash;
 
 use crate::Error;
-use crate::KeyChordPart;
-use crate::KeyboardId;
+use crate::Key;
+use crate::DeviceId;
 
 #[derive(Clone, Debug, Eq, Hash)]
 pub struct KeyChord {
-    modifiers: Vec<KeyChordPart>,
-    key: KeyChordPart,
+    modifiers: Vec<Key>,
+    key: Key,
 }
 
 impl PartialEq for KeyChord {
@@ -32,15 +32,15 @@ impl PartialEq for KeyChord {
 }
 
 impl KeyChord {
-    pub fn new(modifiers: Vec<KeyChordPart>, key: KeyChordPart) -> KeyChord {
+    pub fn new(modifiers: Vec<Key>, key: Key) -> KeyChord {
         KeyChord { modifiers, key }
     }
 
-    pub fn get_modifiers(&self) -> &Vec<KeyChordPart> {
+    pub fn get_modifiers(&self) -> &Vec<Key> {
         &self.modifiers
     }
 
-    pub fn get_key(&self) -> &KeyChordPart {
+    pub fn get_key(&self) -> &Key {
         &self.key
     }
 }
@@ -48,7 +48,7 @@ impl KeyChord {
 impl KeyChord {
     pub fn from(
         s: &str,
-        names_to_keyboard_identifiers: &HashMap<String, KeyboardId>,
+        names_to_keyboard_identifiers: &HashMap<String, DeviceId>,
     ) -> Result<KeyChord, Error> {
         let mut key_chord_parts: Vec<&str> = s.split("+").collect();
 
@@ -56,7 +56,7 @@ impl KeyChord {
             return Err(Error::key_parse_error("Invalid key chord specification."));
         }
 
-        let key_chord_part = KeyChordPart::from(
+        let key_chord_part = Key::from(
             key_chord_parts.remove(key_chord_parts.len() - 1),
             names_to_keyboard_identifiers,
         )?;
@@ -64,7 +64,7 @@ impl KeyChord {
         let mut modifiers = Vec::new();
 
         for key_chord_part in key_chord_parts {
-            let result = KeyChordPart::from(key_chord_part, names_to_keyboard_identifiers)?;
+            let result = Key::from(key_chord_part, names_to_keyboard_identifiers)?;
             modifiers.push(result);
         }
 
@@ -87,87 +87,87 @@ mod tests {
         fn works_correctly() {
             let mut names_to_keyboard_identifiers = HashMap::new();
 
-            names_to_keyboard_identifiers.insert(String::from("first"), KeyboardId::new(0));
-            names_to_keyboard_identifiers.insert(String::from("second"), KeyboardId::new(1));
+            names_to_keyboard_identifiers.insert(String::from("first"), DeviceId::new(0));
+            names_to_keyboard_identifiers.insert(String::from("second"), DeviceId::new(1));
 
             let specs = vec![
                 (
-                    KeyChord::new(vec![], KeyChordPart::Key1(KeyId::from_str("a").unwrap())),
+                    KeyChord::new(vec![], Key::Key1(KeyId::from_str("a").unwrap())),
                     "a",
                 ),
                 (
-                    KeyChord::new(vec![], KeyChordPart::Key1(KeyId::from_str("b").unwrap())),
+                    KeyChord::new(vec![], Key::Key1(KeyId::from_str("b").unwrap())),
                     "b",
                 ),
                 (
                     KeyChord::new(
                         vec![],
-                        KeyChordPart::Key2(KeyboardId::new(0), KeyId::from_str("b").unwrap()),
+                        Key::Key2(DeviceId::new(0), KeyId::from_str("b").unwrap()),
                     ),
                     "0:b",
                 ),
                 (
                     KeyChord::new(
                         vec![],
-                        KeyChordPart::Key2(KeyboardId::new(1), KeyId::from_str("b").unwrap()),
+                        Key::Key2(DeviceId::new(1), KeyId::from_str("b").unwrap()),
                     ),
                     "1:b",
                 ),
                 (
                     KeyChord::new(
                         vec![],
-                        KeyChordPart::Key2(KeyboardId::new(0), KeyId::from_str("b").unwrap()),
+                        Key::Key2(DeviceId::new(0), KeyId::from_str("b").unwrap()),
                     ),
                     "first:b",
                 ),
                 (
                     KeyChord::new(
                         vec![],
-                        KeyChordPart::Key2(KeyboardId::new(1), KeyId::from_str("b").unwrap()),
+                        Key::Key2(DeviceId::new(1), KeyId::from_str("b").unwrap()),
                     ),
                     "second:b",
                 ),
                 (
                     KeyChord::new(
-                        vec![KeyChordPart::Key1(KeyId::from_str("a").unwrap())],
-                        KeyChordPart::Key1(KeyId::from_str("b").unwrap()),
+                        vec![Key::Key1(KeyId::from_str("a").unwrap())],
+                        Key::Key1(KeyId::from_str("b").unwrap()),
                     ),
                     "a+b",
                 ),
                 (
                     KeyChord::new(
                         vec![
-                            KeyChordPart::Key1(KeyId::from_str("a").unwrap()),
-                            KeyChordPart::Key1(KeyId::from_str("b").unwrap()),
+                            Key::Key1(KeyId::from_str("a").unwrap()),
+                            Key::Key1(KeyId::from_str("b").unwrap()),
                         ],
-                        KeyChordPart::Key1(KeyId::from_str("c").unwrap()),
+                        Key::Key1(KeyId::from_str("c").unwrap()),
                     ),
                     "a+b+c",
                 ),
                 (
                     KeyChord::new(
-                        vec![KeyChordPart::Key1(KeyId::from_str("a").unwrap())],
-                        KeyChordPart::Key2(KeyboardId::new(0), KeyId::from_str("c").unwrap()),
+                        vec![Key::Key1(KeyId::from_str("a").unwrap())],
+                        Key::Key2(DeviceId::new(0), KeyId::from_str("c").unwrap()),
                     ),
                     "a+0:c",
                 ),
                 (
                     KeyChord::new(
-                        vec![KeyChordPart::Key2(
-                            KeyboardId::new(1),
+                        vec![Key::Key2(
+                            DeviceId::new(1),
                             KeyId::from_str("a").unwrap(),
                         )],
-                        KeyChordPart::Key2(KeyboardId::new(0), KeyId::from_str("c").unwrap()),
+                        Key::Key2(DeviceId::new(0), KeyId::from_str("c").unwrap()),
                     ),
                     "1:a+0:c",
                 ),
                 (
                     KeyChord::new(
-                        vec![KeyChordPart::Key2(
-                            KeyboardId::new(1),
+                        vec![Key::Key2(
+                            DeviceId::new(1),
                             KeyId::from_str("a").unwrap(),
                         )],
-                        KeyChordPart::Key2(KeyboardId::new(0), KeyId::from_str("c").unwrap()),
+                        Key::Key2(DeviceId::new(0), KeyId::from_str("c").unwrap()),
                     ),
                     "second:a+first:c",
                 ),
@@ -185,8 +185,8 @@ mod tests {
         fn fails_when_incorrect_key_chord_was_provided() {
             let mut names_to_keyboard_identifiers = HashMap::new();
 
-            names_to_keyboard_identifiers.insert(String::from("first"), KeyboardId::new(0));
-            names_to_keyboard_identifiers.insert(String::from("second"), KeyboardId::new(1));
+            names_to_keyboard_identifiers.insert(String::from("first"), DeviceId::new(0));
+            names_to_keyboard_identifiers.insert(String::from("second"), DeviceId::new(1));
 
             let specs = vec![
                 "bb",

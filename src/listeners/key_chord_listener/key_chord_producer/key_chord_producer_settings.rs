@@ -1,23 +1,20 @@
-use crate::KeyChordPart;
+use crate::{DeviceInfo, Key};
 
 pub struct KeyChordProducerSettings {
-    keyboards: Vec<String>,
-    modifiers: Vec<KeyChordPart>,
+    devices: Vec<DeviceInfo>,
+    modifiers: Vec<Key>,
 }
 
 impl KeyChordProducerSettings {
-    pub fn new(keyboards: Vec<String>, modifiers: Vec<KeyChordPart>) -> KeyChordProducerSettings {
-        KeyChordProducerSettings {
-            keyboards,
-            modifiers,
-        }
+    pub fn new(devices: Vec<DeviceInfo>, modifiers: Vec<Key>) -> KeyChordProducerSettings {
+        KeyChordProducerSettings { devices, modifiers }
     }
 
-    pub fn get_keyboards(&self) -> &Vec<String> {
-        &self.keyboards
+    pub fn get_devices(&self) -> &Vec<DeviceInfo> {
+        &self.devices
     }
 
-    pub fn get_modifiers(&self) -> &Vec<KeyChordPart> {
+    pub fn get_modifiers(&self) -> &Vec<Key> {
         &self.modifiers
     }
 }

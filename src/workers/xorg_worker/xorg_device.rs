@@ -11,7 +11,33 @@ impl XorgDevice {
         XorgDevice { connection, root }
     }
 
-    pub fn type_text(&self, _text: &str) -> Result<(), Error> {
+    pub fn type_text(&self, text: &str) -> Result<(), Error> {
+        xcb::test::fake_input(
+            &self.connection,
+            xcb::ffi::xproto::XCB_KEY_PRESS,
+            74,
+            xcb::base::CURRENT_TIME,
+            xcb::base::NONE,
+            0,
+            0,
+            0,
+        )
+        .request_check()
+        .map_err(|_| Error::xorg_error("Error while sending xorg request."))?;
+
+        xcb::test::fake_input(
+            &self.connection,
+            xcb::ffi::xproto::XCB_KEY_RELEASE,
+            74,
+            xcb::base::CURRENT_TIME,
+            xcb::base::NONE,
+            0,
+            0,
+            0,
+        )
+        .request_check()
+        .map_err(|_| Error::xorg_error("Error while sending xorg request."))?;
+
         Ok(())
     }
 
