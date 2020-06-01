@@ -1,17 +1,17 @@
 use std::collections::HashMap;
 use std::sync::mpsc;
 use std::thread;
+use std::time::Duration;
 
+use crate::DeviceEvent;
 use crate::DeviceEventType;
-use crate::DeviceId;
 use crate::DeviceListener;
 use crate::DeviceListenerAggregator;
+use crate::Key;
 use crate::KeyChord;
 use crate::KeyChordEvent;
+use crate::KeyChordProducerHandle;
 use crate::KeyChordProducerSettings;
-use crate::{DeviceEvent, DeviceInfo};
-use crate::{Key, KeyChordProducerHandle};
-use std::time::Duration;
 
 fn is_modifier_event(modifier_map: &HashMap<Key, bool>, key_chord_part: Key) -> bool {
     modifier_map.contains_key(&key_chord_part)

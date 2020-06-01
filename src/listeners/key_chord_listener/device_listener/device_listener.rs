@@ -5,11 +5,11 @@ use std::time::Duration;
 
 use evdev_rs::enums::EventCode;
 
+use crate::DeviceEvent;
 use crate::DeviceEventType;
-use crate::DeviceId;
+use crate::DeviceInfo;
 use crate::DeviceListenerHandle;
 use crate::KeyId;
-use crate::{DeviceEvent, DeviceInfo};
 
 pub struct DeviceListener {
     device_info: DeviceInfo,

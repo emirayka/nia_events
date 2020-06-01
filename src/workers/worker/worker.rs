@@ -75,11 +75,13 @@ impl Worker {
                             }
                         }
                         Command::Spawn(command) => {
-                            match std::process::Command::new(&command).spawn() {
+                            let exec = subprocess::Exec::shell(&command);
+
+                            match exec.popen() {
                                 Ok(_) => {}
                                 Err(error) => {
-                                    worker_elog!("Cannot execute shell command \"{}\":", command);
-                                    worker_elog!("{:?}", error);
+                                    worker_elog!("Cannot spawn process: \"{}\"", command);
+                                    worker_elog!("Error: {}", error.to_string());
                                 }
                             }
                         }
