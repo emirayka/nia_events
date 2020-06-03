@@ -78,7 +78,7 @@ impl Worker {
                             let exec = subprocess::Exec::shell(&command);
 
                             match exec.popen() {
-                                Ok(_) => {}
+                                Ok(mut popen) => popen.detach(),
                                 Err(error) => {
                                     worker_elog!("Cannot spawn process: \"{}\"", command);
                                     worker_elog!("Error: {}", error.to_string());
