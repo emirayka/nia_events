@@ -1,6 +1,6 @@
 use crate::enums::KeyChord;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct KeyChordEvent {
     key_chord: KeyChord,
 }

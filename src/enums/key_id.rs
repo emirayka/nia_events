@@ -11,16 +11,16 @@ lazy_static! {
         let mut m = HashMap::new();
 
         m.insert("Tab", KeyId::from_ev_key(EV_KEY::KEY_TAB));
-        m.insert("CapsLock", KeyId::from_ev_key(EV_KEY::KEY_CAPSLOCK));
-        m.insert("LeftShift", KeyId::from_ev_key(EV_KEY::KEY_LEFTSHIFT));
-        m.insert("LeftControl", KeyId::from_ev_key(EV_KEY::KEY_LEFTCTRL));
-        m.insert("LeftMeta", KeyId::from_ev_key(EV_KEY::KEY_LEFTMETA));
-        m.insert("LeftAlt", KeyId::from_ev_key(EV_KEY::KEY_LEFTALT));
+        m.insert("Caps", KeyId::from_ev_key(EV_KEY::KEY_CAPSLOCK));
+        m.insert("ShiftL", KeyId::from_ev_key(EV_KEY::KEY_LEFTSHIFT));
+        m.insert("CtrlL", KeyId::from_ev_key(EV_KEY::KEY_LEFTCTRL));
+        m.insert("MetaL", KeyId::from_ev_key(EV_KEY::KEY_LEFTMETA));
+        m.insert("AltL", KeyId::from_ev_key(EV_KEY::KEY_LEFTALT));
         m.insert("Space", KeyId::from_ev_key(EV_KEY::KEY_SPACE));
-        m.insert("RightShift", KeyId::from_ev_key(EV_KEY::KEY_RIGHTSHIFT));
-        m.insert("RightControl", KeyId::from_ev_key(EV_KEY::KEY_RIGHTCTRL));
-        m.insert("RightMeta", KeyId::from_ev_key(EV_KEY::KEY_RIGHTMETA));
-        m.insert("RightAlt", KeyId::from_ev_key(EV_KEY::KEY_RIGHTALT));
+        m.insert("ShiftR", KeyId::from_ev_key(EV_KEY::KEY_RIGHTSHIFT));
+        m.insert("CtrlR", KeyId::from_ev_key(EV_KEY::KEY_RIGHTCTRL));
+        m.insert("MetaR", KeyId::from_ev_key(EV_KEY::KEY_RIGHTMETA));
+        m.insert("AltR", KeyId::from_ev_key(EV_KEY::KEY_RIGHTALT));
         m.insert("Compose", KeyId::from_ev_key(EV_KEY::KEY_COMPOSE));
         m.insert("Enter", KeyId::from_ev_key(EV_KEY::KEY_ENTER));
         m.insert("BackSpace", KeyId::from_ev_key(EV_KEY::KEY_BACKSPACE));
@@ -125,7 +125,7 @@ lazy_static! {
     };
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct KeyId {
     id: u16,
 }

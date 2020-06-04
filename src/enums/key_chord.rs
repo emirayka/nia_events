@@ -1,11 +1,10 @@
 use std::collections::HashMap;
-use std::hash::Hash;
 
+use crate::DeviceId;
 use crate::Error;
 use crate::Key;
-use crate::DeviceId;
 
-#[derive(Clone, Debug, Eq, Hash)]
+#[derive(Clone, Debug, Eq)]
 pub struct KeyChord {
     modifiers: Vec<Key>,
     key: Key,
@@ -22,7 +21,29 @@ impl PartialEq for KeyChord {
         }
 
         for key_chord_part in &self.modifiers {
-            if !other.modifiers.contains(key_chord_part) {
+            let mut flag = true;
+
+            for other_key_chord_part in &other.modifiers {
+                if key_chord_part == other_key_chord_part {
+                    flag = false
+                }
+            }
+
+            if flag {
+                return false;
+            }
+        }
+
+        for other_key_chord_part in &other.modifiers {
+            let mut flag = true;
+
+            for key_chord_part in &self.modifiers {
+                if key_chord_part == other_key_chord_part {
+                    flag = false
+                }
+            }
+
+            if flag {
                 return false;
             }
         }
@@ -153,20 +174,14 @@ mod tests {
                 ),
                 (
                     KeyChord::new(
-                        vec![Key::Key2(
-                            DeviceId::new(1),
-                            KeyId::from_str("a").unwrap(),
-                        )],
+                        vec![Key::Key2(DeviceId::new(1), KeyId::from_str("a").unwrap())],
                         Key::Key2(DeviceId::new(0), KeyId::from_str("c").unwrap()),
                     ),
                     "1:a+0:c",
                 ),
                 (
                     KeyChord::new(
-                        vec![Key::Key2(
-                            DeviceId::new(1),
-                            KeyId::from_str("a").unwrap(),
-                        )],
+                        vec![Key::Key2(DeviceId::new(1), KeyId::from_str("a").unwrap())],
                         Key::Key2(DeviceId::new(0), KeyId::from_str("c").unwrap()),
                     ),
                     "second:a+first:c",
@@ -205,5 +220,11 @@ mod tests {
                 assert!(result.is_err());
             }
         }
+    }
+
+    #[cfg(test)]
+    mod equality {
+        #[allow(unused_imports)]
+        use super::*;
     }
 }

@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
@@ -13,20 +12,30 @@ use crate::KeyChordEvent;
 use crate::KeyChordProducerHandle;
 use crate::KeyChordProducerSettings;
 
-fn is_modifier_event(modifier_map: &HashMap<Key, bool>, key_chord_part: Key) -> bool {
-    modifier_map.contains_key(&key_chord_part)
+type ModifierMap = Vec<(Key, bool)>;
+
+fn is_modifier_event(modifier_map: &ModifierMap, key_chord_part: Key) -> bool {
+    for modifier_state in modifier_map {
+        if modifier_state.0 == key_chord_part {
+            return true;
+        }
+    }
+
+    return false;
 }
 
-fn set_modifier_state(modifier_map: &mut HashMap<Key, bool>, key_chord_part: Key, state: bool) {
-    let reference = modifier_map.get_mut(&key_chord_part).unwrap();
-
-    *reference = state;
+fn set_modifier_state(modifier_map: &mut ModifierMap, key_chord_part: Key, state: bool) {
+    for modifier_state in modifier_map {
+        if modifier_state.0 == key_chord_part {
+            modifier_state.1 = state
+        }
+    }
 }
 
-fn construct_key_chord(modifier_map: &HashMap<Key, bool>, event: DeviceEvent) -> KeyChord {
+fn construct_key_chord(modifier_map: &ModifierMap, event: DeviceEvent) -> KeyChord {
     let modifier_keys = modifier_map
         .iter()
-        .filter(|(_, pressed)| **pressed)
+        .filter(|(_, pressed)| *pressed)
         .map(|(key, _)| *key)
         .collect();
 
@@ -90,10 +99,10 @@ impl KeyChordProducer {
             );
 
             let modifier_keys = modifier_keys;
-            let mut modifier_map = HashMap::new();
+            let mut modifier_map = ModifierMap::new();
 
             for modifier_key in modifier_keys {
-                modifier_map.insert(modifier_key, false);
+                modifier_map.push((modifier_key, false));
             }
 
             loop {

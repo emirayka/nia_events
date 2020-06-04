@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::hash::Hash;
 use std::hash::Hasher;
 
-use crate::enums::KeyId;
 use crate::enums::DeviceId;
+use crate::enums::KeyId;
 use crate::Error;
 
 #[derive(Clone, Copy, Debug, Eq)]
@@ -21,25 +21,15 @@ impl Key {
     }
 }
 
-impl Hash for Key {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        match self {
-            Key::Key1(key_id) => key_id.hash(state),
-            Key::Key2(_, key_id) => key_id.hash(state),
-        }
-    }
-}
-
 impl PartialEq for Key {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Key::Key1(key_id_1), Key::Key1(key_id_2)) => key_id_1 == key_id_2,
             (Key::Key1(key_id_1), Key::Key2(_, key_id_2)) => key_id_1 == key_id_2,
             (Key::Key2(_, key_id_1), Key::Key1(key_id_2)) => key_id_1 == key_id_2,
-            (
-                Key::Key2(keyboard_id_1, key_id_1),
-                Key::Key2(keyboard_id_2, key_id_2),
-            ) => keyboard_id_1 == keyboard_id_2 && key_id_1 == key_id_2,
+            (Key::Key2(keyboard_id_1, key_id_1), Key::Key2(keyboard_id_2, key_id_2)) => {
+                keyboard_id_1 == keyboard_id_2 && key_id_1 == key_id_2
+            }
         }
     }
 }

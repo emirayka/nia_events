@@ -20,7 +20,7 @@ impl DeviceEventType {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct DeviceEvent {
     device_id: DeviceId,
     key_id: KeyId,

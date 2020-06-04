@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::Error;
 use std::fmt::Formatter;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct DeviceId {
     id: u16,
 }
